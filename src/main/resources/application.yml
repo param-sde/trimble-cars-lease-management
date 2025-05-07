@@ -1,0 +1,78 @@
+server:
+  port: ${TRIMBLE_CAR_LEASE_MGMNT_SERVER_PORT:8085}
+  
+spring:
+  application:
+    name: ${TRIMBLE_CAR_LEASE_MGMNT_APP_NAME:trimble-car-lease-management}
+
+  datasource:
+    url: jdbc:h2:mem:trimbledb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: ${DATASOURCE_USERNAME_H2:sa}
+    password: ${DATASOURCE_PWD_H2:}
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: never #always
+      schema-locations: ${SCHEMA_PATH:classpath:schema.sql}
+      data-locations: ${SAMPLE_DATA_PATH:classpath:data.sql}
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  cache:
+    cache-names:
+      - car-cache
+      - user-cache
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+  main:
+    allow-bean-definition-overriding: true
+
+# Logger
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    com.trimble: DEBUG
+  file:
+    name: ${LOG_FILE_NAME:F://Trimble_Cars/logs/car_lease_management.log}
+
+# Swagger
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    enabled: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+environment:
+  car-lease:
+    max-active-leases-per-user: ${MAX_ACTIVE_LEASE_PER_USER:2}
+    default-owner-status: ACTIVE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
